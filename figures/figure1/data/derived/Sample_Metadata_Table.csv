@@ -1,0 +1,14 @@
+﻿sample_id,tissue_type,patient_id
+A2-Primary-FFPE-RNA,primary,A2
+A11-PT-FFPE-RNA,primary,A11
+A20-Primary-FFPE-RNA,primary,A20
+A26-Primary-FFPE-RNA,primary,A26
+A28-PT-FFPE-RNA,primary,A28
+A2-LungMet-RNA,lung_met,A2
+A11-LUNG-MET-RNA,lung_met,A11
+A20-LungMet-L-RNA,lung_met,A20
+A20-LungMet-R-RNA,lung_met,A20
+A26-Lung-Met-1-RNA,lung_met,A26
+A26-Lung-Met-2-RNA,lung_met,A26
+A28-LungMet-LLL-RNA,lung_met,A28
+A28-LungMet-RUL-RNA,lung_met,A28

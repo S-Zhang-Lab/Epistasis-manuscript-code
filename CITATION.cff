@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "Please cite the accompanying manuscript and the version of this software used."
+type: software
+title: "Epistasis manuscript code"
+authors:
+  - name: "S. Zhang Lab"
+license: MIT
+abstract: "Analysis and plotting code accompanying Niche-dependent epistasis within the cancer genome shapes metastatic fitness, by Xiyu Liu and colleagues."
