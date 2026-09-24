@@ -106,8 +106,15 @@ echo ""
 if [[ $missing -eq ${#STUDIES[@]} ]]; then
   echo "Nothing to do: no full study MAF is present."
   echo "This script is provenance only. Panel B reads the committed subsets and"
-  echo "needs no download. To re-derive them, fetch the full MAFs first:"
-  echo "    bash scripts/download_input_data.sh --full-tcga"
+  echo "needs no download. To re-derive them, fetch the full MAFs first from"
+  echo "the pinned cBioPortal DataHub revision recorded in DATA.md:"
+  echo "    DH=https://media.githubusercontent.com/media/cBioPortal/datahub"
+  echo "    REF=db2f8008a119f6008fba5a99102d085a863995a1"
+  echo "    for c in brca luad lusc coadread stad hnsc blca prad ov lihc; do"
+  echo "      s=\${c}_tcga_pan_can_atlas_2018"
+  echo "      curl -fsSL --create-dirs -o data/raw/TCGA_PanCan/\$s/data_mutations.txt \\"
+  echo "        \$DH/\$REF/public/\$s/data_mutations.txt"
+  echo "    done"
   exit 0
 fi
 

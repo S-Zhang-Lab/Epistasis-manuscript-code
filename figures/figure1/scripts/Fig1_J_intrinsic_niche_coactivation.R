@@ -1,7 +1,6 @@
 message("[Panel J]  DawnRank intrinsic \u00d7 niche correlation matrix — building...")
 
-DAWNRANK_FILE <- file.path(INPUT_DIR, "GSE110590", "JCI96153.sdt1-8.xlsx")
-DAWNRANK_SHEET <- "Supplementary Table 5"
+DAWNRANK_FILE <- file.path(DATA_DERIVED, "dawnrank_panel_subset.csv")
 
 LUNG_MET_COLS <- c(
   "A2.LungMet",
@@ -41,13 +40,10 @@ message("    niche-associated (", length(niche_genes), "): ",
         paste(niche_genes, collapse = ", "))
 message("    total panel: ", length(panel_genes))
 
-message("  [2/4] Loading DawnRank Supp Table 5 + subsetting...")
+message("  [2/4] Loading DawnRank panel subset + subsetting...")
 
-dawnrank_raw <- read_excel(DAWNRANK_FILE, sheet = DAWNRANK_SHEET, skip = 1)
-
-names(dawnrank_raw)[1] <- "Gene"
-
-dawnrank_raw$Gene <- sub("\\|.*$", "", dawnrank_raw$Gene)
+dawnrank_raw <- read.csv(DAWNRANK_FILE, check.names = FALSE,
+                         stringsAsFactors = FALSE)
 
 missing_cols <- setdiff(LUNG_MET_COLS, colnames(dawnrank_raw))
 if (length(missing_cols) > 0) {

@@ -8,8 +8,7 @@ REQUIRED_RAW <- c(
   file.path("GSE110590", c(
     "GSE110590-GPL11154_series_matrix.txt.gz",
     "GSE110590-GPL16791_series_matrix.txt.gz",
-    "GSE110590_RAP_A16_log2.sne.tsv.gz",
-    "JCI96153.sdt1-8.xlsx")),
+    "GSE110590_RAP_A16_log2.sne.tsv.gz")),
 
   file.path("MSK_MET_2021_breast", c(
     "clinical.csv.gz", "mutations.csv.gz", "cna.csv.gz")),
@@ -21,7 +20,7 @@ REQUIRED_RAW <- c(
 
 accepts_plain <- function(files) grepl("TCGA_PanCan", files, fixed = TRUE)
 
-REQUIRED_DERIVED <- c("Sample_Metadata_Table.csv")
+REQUIRED_DERIVED <- c("Sample_Metadata_Table.csv", "dawnrank_panel_subset.csv")
 
 status_table <- function(root, files) {
   path <- file.path(root, files)

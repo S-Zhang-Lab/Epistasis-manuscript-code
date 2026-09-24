@@ -2,7 +2,77 @@ cff-version: 1.2.0
 message: "Please cite the accompanying manuscript and the version of this software used."
 type: software
 title: "Epistasis manuscript code"
-authors:
-  - name: "S. Zhang Lab"
-license: MIT
 abstract: "Analysis and plotting code accompanying Niche-dependent epistasis within the cancer genome shapes metastatic fitness, by Xiyu Liu and colleagues."
+version: 1.0.0
+date-released: 2026-09-24
+license: MIT
+repository-code: "https://github.com/S-Zhang-Lab/Epistasis-manuscript-code"
+keywords:
+  - epistasis
+  - genetic interactions
+  - metastasis
+  - CRISPR screening
+  - Perturb-seq
+  - tumor microenvironment
+authors:
+  - given-names: "Xiyu"
+    family-names: "Liu"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Le"
+    family-names: "He"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Min"
+    family-names: "Zhao"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Samantha M."
+    family-names: "Golomb"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Wei"
+    family-names: "Ma"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Xinrui"
+    family-names: "Yang"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Emilija"
+    family-names: "Aleksandrovic"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Hazel M."
+    family-names: "Borges"
+    affiliation: "Lyda Hill Department of Bioinformatics, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Kevin M."
+    family-names: "Dean"
+    affiliation: "Lyda Hill Department of Bioinformatics, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Lei"
+    family-names: "Wang"
+    affiliation: "Cecil H. and Ida Green Center for Reproductive Biology Sciences, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Gary C."
+    family-names: "Hon"
+    affiliation: "Cecil H. and Ida Green Center for Reproductive Biology Sciences, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Lei"
+    family-names: "Guo"
+    affiliation: "Lyda Hill Department of Bioinformatics, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Dailin"
+    family-names: "Gan"
+    affiliation: "University of Notre Dame, Notre Dame, IN, USA"
+  - given-names: "Hao"
+    family-names: "Zhu"
+    affiliation: "Children's Research Institute, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Jun"
+    family-names: "Li"
+    affiliation: "University of Notre Dame, Notre Dame, IN, USA"
+  - given-names: "Lin"
+    family-names: "Xu"
+    affiliation: "Lyda Hill Department of Bioinformatics, UT Southwestern Medical Center, Dallas, TX, USA"
+  - given-names: "Siyuan"
+    family-names: "Zhang"
+    affiliation: "Department of Pathology, UT Southwestern Medical Center, Dallas, TX, USA"
+references:
+  - type: data
+    title: "Processed single-cell objects for Niche-dependent epistasis within the cancer genome shapes metastatic fitness"
+    authors:
+      - given-names: "Siyuan"
+        family-names: "Zhang"
+      - given-names: "Xiyu"
+        family-names: "Liu"
+    doi: "10.5281/zenodo.21384699"
+    year: 2026

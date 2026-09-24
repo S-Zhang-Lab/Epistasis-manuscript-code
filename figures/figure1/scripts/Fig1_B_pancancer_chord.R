@@ -45,8 +45,9 @@ if (file.exists(PANCAN_DRIVER_CONTRACT)) {
          "  in the gene list only: ",
          paste(setdiff(contract_genes, PANCAN_DRIVERS), collapse = ", "), "\n",
          "  Reconcile PANCAN_DRIVERS with docs/gene_lists/",
-         "panel_B_pancan_drivers_53.txt, then rebuild the committed subsets:\n",
-         "    bash scripts/download_input_data.sh --full-tcga\n",
+         "panel_B_pancan_drivers_53.txt, then rebuild the committed subsets.\n",
+         "  Running scripts/subset_tcga_pancan.sh with no full MAF present\n",
+         "  prints the commands that fetch them:\n",
          "    bash scripts/subset_tcga_pancan.sh",
          call. = FALSE)
   }

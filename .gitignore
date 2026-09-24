@@ -19,3 +19,6 @@ Rplots.pdf
 *.fastq.gz
 .env
 .env.*
+
+# Third-party source not redistributed here (see DATA.md)
+figures/figure1/data/raw/GSE110590/JCI96153.sdt1-8.xlsx

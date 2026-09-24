@@ -23,7 +23,14 @@ need <- function(f) {
   p <- file.path(RAW, f)
   if (!file.exists(p))
     stop("Missing raw input: ", p, "\n",
-         "  Fetch it first:  bash scripts/download_input_data.sh\n",
+         "  Fetch the upstream study first, from the pinned cBioPortal DataHub\n",
+         "  revision recorded in DATA.md:\n",
+         "    mkdir -p data/raw/msk_met_2021_raw\n",
+         "    for f in data_clinical_sample.txt data_clinical_patient.txt \\\n",
+         "             data_mutations.txt data_cna.txt; do curl -fsSL -o \\\n",
+         "      data/raw/msk_met_2021_raw/$f \\\n",
+         "      https://media.githubusercontent.com/media/cBioPortal/datahub/",
+         "db2f8008a119f6008fba5a99102d085a863995a1/public/msk_met_2021/$f; done\n",
          "  (not normally needed: the derived CSVs ship with the repository)",
          call. = FALSE)
   p

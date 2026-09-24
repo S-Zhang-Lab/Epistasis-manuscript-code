@@ -16,7 +16,7 @@ The repository contains five figure modules, their manuscript-related supplement
 
 ## Reproduction
 
-Use R 4.5.1 and Python 3.9 or newer. Python uses only its standard library. Run these commands from the repository root. Package installation requires network access; Bioconductor packages and their system dependencies are needed for several modules.
+Use R 4.5.1 and Python 3.9 or newer. Python uses only its standard library. Run these commands from the repository root. Package installation requires network access; Bioconductor packages and their system dependencies are needed for several modules. Several packages compile from source and need a working Fortran toolchain, which is the usual cause of a failed restore on macOS; configuring a binary repository such as `options(repos = c(P3M = "https://packagemanager.posit.co/cran/latest"))` avoids the compilers entirely.
 
 ```bash
 # Check the included files and the panel-to-code mapping.
