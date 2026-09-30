@@ -400,6 +400,10 @@ p2c <- make_rank_plot(
   n_label = 8)
 
 # Supplementary panel M: the in vitro specificity control.
+# NOTE: Day 14 here is correct and is not a stale label. The two arms of the
+# round-1 screen run to different endpoints: R1_construct_counts.csv carries
+# Cell_Day14_* for the cultured arm and Mice_Day18_* for the injected arm.
+# Fig2D (in vivo) is therefore Day 18 while this control is Day 14.
 if (file.exists(file.path(OUTPUT_DIR, "R1_enrichment_day0_invitro.csv"))) {
   make_rank_plot(
     "R1_enrichment_day0_invitro.csv",
