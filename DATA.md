@@ -51,7 +51,7 @@ Place these exact files in `figures/figure3/data/raw/`. They are excluded from G
 
 The Figure 4 panel workflow uses the included pathway-GI tables. `scripts/recompute_pathway_GI_from_RDS.R` can recalculate them when the following processed objects are supplied in `figures/figure4/data/raw/RDS/`:
 
-- `Perturb_UTSW37_GSE322809_InVivo_merged.rds` (or `Perturb_InVivo_merged.rds`), the PTEN in-vivo object, corresponding to GEO accession GSE322809.
+- `Perturb_InVivo_merged.rds`, the PTEN in-vivo object, corresponding to GEO accession GSE322809. Some earlier notes call this file `Perturb_UTSW37_GSE322809_InVivo_merged.rds`; it is the same object, and the Zenodo record carries it under the shorter name. Either filename works, because the script accepts both.
 - `Perturb_UTSW33_GSE322808.rds`, the CHEK2/CX3CL1 object, corresponding to GEO accession GSE322808.
 
 These optional upstream objects are not included in Git. Both are in the same Zenodo record as the Figure 3 objects, [doi:10.5281/zenodo.21384699](https://doi.org/10.5281/zenodo.21384699). This script obtains Hallmark annotations through `msigdbr` and writes the pathway CSVs in `data/derived/`; a different annotation release may change those tables. The regular panel workflow starts from the supplied, checksummed summaries.
