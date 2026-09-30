@@ -1,9 +1,25 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Figures for the label-based epistasis residual (Norman additive model).
+#   A  interaction coefficients c1 (PTEN) vs c2 (partner): in vitro = PTEN-dominant;
+#      in vivo = partner-dominant (delta_DKO tracks the partner arm). R2 annotated.
+#   B  additivity R2 per partner x context.
+#   C  pathway residual (DKO - additive) heatmap: partner x Hallmark, in vitro|in vivo.
+# Merged in-vivo object; every arm compared to the annotated NT*NT (merged reference).
+#
+# Only A is placed, as Supplementary Fig 3G. B and C are supporting analyses that
+# the assembled figure does not use, so they are written to output/figures/archive/
+# rather than output/figures/supplementary/ (2026-08-28); the numbers behind them
+# remain in output/tables/label_epistasis_coeffs.csv and label_pathway_residual.csv.
+# v7 repo overhaul 2026-07-15: relocated from XL_code/fig3_panels_new_build/build_label_epistasis_panels.R; was panelJ_interaction_coeffs -> FigS3G_coefficient_flip.
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 suppressPackageStartupMessages({ library(ggplot2) })
 CO <- read.csv(tbl("label_epistasis_coeffs.csv"), check.names=FALSE)
 G  <- CO[CO$level=="gene",]; G$context <- factor(G$context, levels=c("In vitro","In vivo"))
 shp <- c(Cdh1=16, Cx3cl1=17, Cxcr5=15, Tlr7=18)
 
+## Panel A: interaction coefficients c1 vs c2
 pA <- ggplot(G, aes(c1, c2, colour=context, shape=partner)) +
   geom_abline(slope=1,intercept=0,colour="grey80",linewidth=0.3,linetype="dashed") +
   geom_hline(yintercept=0,colour="grey90",linewidth=0.3)+geom_vline(xintercept=0,colour="grey90",linewidth=0.3) +
@@ -18,6 +34,7 @@ pA <- ggplot(G, aes(c1, c2, colour=context, shape=partner)) +
   fig_theme + theme(legend.position="none")
 save_panel(pA, "FigS3G_coefficient_flip", 1.45, 1.45, fig_supp())
 
+## Panel B: additivity R2
 pB <- ggplot(G, aes(factor(partner,levels=c("Cdh1","Cx3cl1","Cxcr5","Tlr7")), R2, fill=context)) +
   geom_col(position=position_dodge(width=0.72), width=0.66, colour="black", linewidth=0.2) +
   geom_text(aes(label=sprintf("%.2f",R2)), position=position_dodge(width=0.72), vjust=-0.3, size=FS/.MM) +
@@ -25,8 +42,9 @@ pB <- ggplot(G, aes(factor(partner,levels=c("Cdh1","Cx3cl1","Cxcr5","Tlr7")), R2
   scale_y_continuous(limits=c(0,1), expand=expansion(mult=c(0,0.1))) +
   labs(x=NULL, y="additivity R²", title="Additivity of the double-KO (gene level)") +
   fig_theme + theme(axis.text.x=element_text(face="italic"), legend.position="top", legend.key.size=unit(7,"pt"))
-save_panel(pB, "FigS3G_additivity_R2", 3.4, 2.1, fig_archive())
+save_panel(pB, "FigS3G_additivity_R2", 3.4, 2.1, fig_archive())   # not placed
 
+## Panel C: pathway residual heatmap
 PR <- read.csv(tbl("label_pathway_residual.csv"), check.names=FALSE)
 PR$context <- factor(PR$context, levels=c("In vitro","In vivo"))
 agg <- aggregate(abs(residual)~pathway, PR, max); top <- agg$pathway[order(-agg$`abs(residual)`)][1:22]
@@ -39,6 +57,6 @@ pC <- ggplot(PRt, aes(partner, pathway, fill=residual)) + geom_tile() +
   labs(x=NULL, y=NULL, title="Neomorphic pathway residual (Hallmark AUCell)") +
   fig_theme + theme(axis.text.x=element_text(angle=45,hjust=1,face="italic"), axis.text.y=element_text(size=FS-0.5),
                     axis.line=element_blank(), axis.ticks=element_blank(), legend.key.size=unit(6,"pt"))
-save_panel(pC, "FigS3G_pathway_residual", 4.6, 3.4, fig_archive())
+save_panel(pC, "FigS3G_pathway_residual", 4.6, 3.4, fig_archive())   # not placed
 cat("saved: FigS3G_coefficient_flip (supplementary/);",
     "FigS3G_additivity_R2, FigS3G_pathway_residual (archive/, not placed)\n")

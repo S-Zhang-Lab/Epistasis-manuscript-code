@@ -1,3 +1,12 @@
+#!/usr/bin/env Rscript
+# P2 per-mouse + STATISTICS: Synergistic vs Buffering per pathway.
+# Replicate = MOUSE (average the partners within each mouse) -> n=3 syn, 4 buf.
+# Welch t-test + Wilcoxon per pathway, BH-FDR across the 13 pre-specified pathways.
+# v7 repo overhaul 2026-07-15: relocated from
+#   XL_code/fig3_panels_new_build/prototypes_panelK/build_protoK_P2_stats.R;
+#   was protoK_P2permouse_B_pvalues -> FigS3J_permouse_pointrange; reads the
+#   per-mouse deviations handoff cache('P2_permouse_deviations.csv') produced by
+#   Fig3H_permouse_residual.R, writes stats to tbl('P2_permouse_stats.csv').
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 suppressPackageStartupMessages({ library(data.table); library(ggplot2) })
 FS6 <- 6
@@ -14,10 +23,11 @@ disp <- c(INTERFERON_GAMMA_RESPONSE="IFN-gamma", INTERFERON_ALPHA_RESPONSE="IFN-
           MTORC1_SIGNALING="mTORC1", OXIDATIVE_PHOSPHORYLATION="OxPhos", GLYCOLYSIS="Glycolysis")
 
 dev <- fread(cache("P2_permouse_deviations.csv"))
-
+## mouse-level: average the (1-2) partners present in each mouse -> one value per mouse
 mouseDT <- dev[, .(dev_m=mean(dev)), by=.(mouse, lane, eclass, pathway)]
 cat("mice per class:\n"); print(unique(mouseDT[,.(mouse,eclass)])[, .N, by=eclass])
 
+## per-pathway Synergistic vs Buffering test
 stat <- rbindlist(lapply(niche, function(p){
   s <- mouseDT[eclass=="Synergistic" & pathway==p, dev_m]
   b <- mouseDT[eclass=="Buffering"   & pathway==p, dev_m]
@@ -33,6 +43,7 @@ cat("\n=== Synergistic vs Buffering, per pathway (mouse-level, n=3 vs 4) ===\n")
 print(stat[, .(pathway=disp[pathway], mean_syn=round(mean_syn,4), mean_buf=round(mean_buf,4),
                diff=round(diff,4), p_t=round(p_t,3), q_FDR=round(q_t,3), p_wilcox=round(p_wilcox,3))])
 
+## mouse-level mean +/- SE for the plot (n=3 vs 4)
 summ <- mouseDT[, .(m=mean(dev_m), se=sd(dev_m)/sqrt(.N), n=.N), by=.(pathway, eclass)]
 ford <- rev(disp[niche])
 summ[, plab := factor(disp[pathway], levels=ford)]

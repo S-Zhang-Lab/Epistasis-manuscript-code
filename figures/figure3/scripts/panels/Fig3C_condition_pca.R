@@ -1,10 +1,19 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Fig. 3C — condition-level PCA.
+# 8 points = 4 partners x 2 contexts (Pten x partner double-KO pseudobulk).
+# shape = PTEN-loss partner; fill = grey (in vitro) / blue (in-vivo Buffer) /
+# red (in-vivo Synergistic); in-vitro & in-vivo hulls; point labels; dashed
+# origin; PC1/PC2 % axes; two legends. Base pdf(), Helvetica, ~5pt.
+# v7 repo overhaul 2026-07 : relocated from XL_code/fig3_panels_new_build/build_condition_pca.R; was panelB_condition_pca -> Fig3C_condition_pca.
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 set.seed(1234)
 suppressPackageStartupMessages({ library(Seurat); library(SeuratObject); library(Matrix)
   library(ggplot2); library(ggforce); library(ggrepel) })
 PARTNERS <- c("Cdh1","Cx3cl1","Cxcr5","Tlr7")
 
-dko_pb <- function(file, ctx){
+dko_pb <- function(file, ctx){          # pseudobulk (summed RNA counts) of each Pten x partner double-KO
   o <- readRDS(raw(file)); o[["RNA"]] <- JoinLayers(o[["RNA"]])
   cts <- LayerData(o, assay="RNA", layer="counts")
   out <- sapply(PARTNERS, function(p){
@@ -48,4 +57,4 @@ p <- ggplot(pd, aes(PC1, PC2)) +
   theme(legend.key=element_blank())
 save_panel(p, "Fig3C_condition_pca", 3.6, 2.7, fig_main())
 write.csv(pd, tbl("Fig3C_condition_pca_coords.csv"), row.names=FALSE)
-cat(sprintf("condition PCA written. PC1=%.1f%% PC2=%.1f%%\n", ve[1], ve[2]))
+cat(sprintf("condition PCA (draft style) written. PC1=%.1f%% PC2=%.1f%%\n", ve[1], ve[2]))

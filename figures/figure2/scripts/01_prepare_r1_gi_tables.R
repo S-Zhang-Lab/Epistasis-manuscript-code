@@ -320,6 +320,17 @@ plot_guides <- enr_invivo$guides |>
     color_group = if_else(lfc_guide > 0, "LFC > 0", "LFC <= 0")
   )
 
+# Numerical source data for Figure 2E: this is the exact data frame supplied to
+# ggplot below, after Day-0 gating, NT x NT centering, and top-pair selection.
+write.csv(
+  plot_guides |>
+    select(sgRNA, gene, gene_A, gene_B, raw_day0, lfc_guide,
+           mean_norm_count, se_lfc, color_group),
+  file.path(OUT, "Fig2E_guide_lfc_source_data.csv"),
+  row.names = FALSE,
+  quote = FALSE
+)
+
 x_range <- range(plot_guides$lfc_guide, na.rm = TRUE)
 p2d <- ggplot(plot_guides, aes(x = lfc_guide, y = gene, color = color_group,
                                alpha = color_group)) +

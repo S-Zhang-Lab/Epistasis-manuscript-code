@@ -1,3 +1,20 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# CACHE per-cell data to make "niche compression" concrete (Supplementary Fig. S3I).
+# For each partner's 2x2 (NT*NT, Pten*NT, NT*par, Pten*par), within its own pool
+# (in vitro) / lane (in vivo), compute two things per cell:
+#   (1) dko_score = held-out (2-fold cross-fit) score of the DOUBLE-KO one-vs-rest
+#       signature -> "can the Pten*par signature pick its own cells out of the crowd?"
+#       In vitro the Pten*par cells score high and the rest low (separable); in vivo
+#       the distributions overlap (compressed). This is the per-cell version of the
+#       signature-specificity z on the lollipop.
+#   (2) PC1/PC2 = LOCAL PCA of that 2x2 (top-2000 HVG, scaled) -> the four genotype
+#       clouds separate in vitro and merge in vivo.
+# Writes compression_concrete_cells.csv (no downstream object reload needed).
+#
+# v7 repo overhaul 2026-07-15 : relocated from XL_code/fig3_panels_new_build/build_compression_concrete_cache.R;
+#   was build_compression_concrete_cache.R -> FigS3I_dko_density_cache.R (cache basename compression_concrete_cells.csv preserved).
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 set.seed(1)
 suppressPackageStartupMessages({ library(Seurat); library(SeuratObject); library(Matrix); library(matrixStats) })

@@ -1,3 +1,36 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+#  FigS1_divergence.R
+#  Robustness panels for the lung co-occurrence divergence (Supplementary Fig 1).
+# -----------------------------------------------------------------------------
+#  REBUILT 2026-08-05 on the corrected exposure. Produces:
+#
+#    FigS1_confound_battery        Supp. Fig. 1 panel D. The lung-biopsy
+#                                  divergence repeated under a battery of
+#                                  confounder controls, each row annotated with
+#                                  the number of lung specimens available to
+#                                  that test.
+#    FigS1_naive_null_landscape    Supp. Fig. 1 panel C. The same comparison
+#                                  under a naive size-only null, shown to
+#                                  justify the matched analysis. A
+#                                  methodological control, not a result.
+#
+#  WHAT CHANGED
+#    1. Exposure. Previously DMETS_DX_LUNG (whether the patient ever had lung
+#       involvement). Now the biopsy site of the sequenced specimen
+#       (METASTATIC_SITE == "Lung"), restricted to metastasis-derived
+#       specimens, matching main panels D and E.
+#    2. The matched-null histogram panel was PROMOTED to main panel D and is no
+#       longer produced here, so the two figures do not duplicate it.
+#    3. The battery title no longer claims the result holds under every
+#       confounder. On the corrected exposure it holds in 5 of 7; the two that
+#       do not are reported on the panel rather than omitted.
+#    4. Axis and legend text spells out "log odds ratio". In sans-serif type the
+#       abbreviation "ln" is indistinguishable from "In", which misleads readers.
+#
+#  Terminology: DNA co-occurrence only. "Epistasis" is reserved for the concept
+#  panel, the title, and the Fig. 2 functional screen.
+# =============================================================================
 suppressPackageStartupMessages({ library(data.table); library(ggplot2); library(patchwork) })
 
 if (!exists("OUTPUT_SUP_DIR")) {
@@ -13,14 +46,16 @@ if (!exists("OUTPUT_SUP_DIR")) {
 
 if (!exists("pdf_device")) source(file.path(REPO_ROOT, "R", "devices.R"))
 IN  <- file.path(DATA_RAW, "MSK_MET_2021_breast"); SUP <- OUTPUT_SUP_DIR
-
+# Inputs ship gzipped in the repository (~4 MB); fall back to a plain .csv if
+# someone has decompressed them. data.table::fread reads either transparently.
 msk <- function(base) { g <- file.path(IN, paste0(base, ".gz"))
                         if (file.exists(g)) g else file.path(IN, base) }
+
 
 GENES <- c("TP53","PIK3CA","CDH1","GATA3","MAP3K1","KMT2C","ESR1","ARID1A","AKT1","NF1",
            "NCOR1","FOXA1","TBX3","RB1","ERBB2","CCND1","MYC","FGFR1","PTEN","CDKN2A")
 SILENT <- c("Silent","Intron","3'UTR","5'UTR","3'Flank","5'Flank","IGR","RNA","Splice_Region")
-SC <- c("DMETS_DX_BONE","DMETS_DX_LIVER","DMETS_DX_LUNG","DMETS_DX_CNS_BRAIN")
+SC <- c("DMETS_DX_BONE","DMETS_DX_LIVER","DMETS_DX_LUNG","DMETS_DX_CNS_BRAIN")   # pool definition only
 ng <- length(GENES)
 
 clin <- fread(msk("clinical.csv"))
@@ -39,7 +74,7 @@ bt <- as.character(as.integer(cut(burden,quantile(burden,c(0,1/3,2/3,1)),include
 amt <- mut[,.N,by=sampleId]$N[match(cm$sampleId, mut[,.N,by=sampleId]$sampleId)]; amt[is.na(amt)]<-0
 tt <- as.character(as.integer(cut(amt,quantile(amt,c(0,1/3,2/3,1)),include.lowest=TRUE)))
 S_both <- paste(subtype,bt,sep="|")
-yLb <- grepl("Lung", cm$METASTATIC_SITE, ignore.case=TRUE)
+yLb <- grepl("Lung", cm$METASTATIC_SITE, ignore.case=TRUE)     # EXPOSURE: biopsy site
 
 lnor <- function(X){k<-ncol(X);b<-crossprod(X);ct<-diag(b);a<-b;bb<-matrix(ct,k,k)-a
   cc<-matrix(ct,k,k,byrow=TRUE)-a;d<-nrow(X)-a-bb-cc;log(((a+.5)*(d+.5))/((bb+.5)*(cc+.5)))}
@@ -52,6 +87,7 @@ pstrat <- function(y,st,N,X=Xm){obs<-mad_dl(X[y,,drop=FALSE],X[!y,,drop=FALSE])
   for(b in 1:N){yp<-logical(length(y));for(j in seq_along(lv)){k<-lv[[j]];if(nv[j]>0)yp[k[sample(length(k),nv[j])]]<-TRUE}
     pp[b]<-mad_dl(X[yp,,drop=FALSE],X[!yp,,drop=FALSE])};list(obs=obs,p=(sum(pp>=obs)+1)/(N+1))}
 
+# ---------------------------------------------------------------- confound battery
 cat("[FigS1_div] confound battery (biopsy-site exposure) ...\n")
 set.seed(1); N_PERM <- 2500
 hi <- which(burden >= 5); lungHist <- cm$DMETS_DX_LUNG=="Yes"
@@ -84,11 +120,37 @@ pE <- ggplot(batt, aes(P, test, color=sig)) +
 ggsave(file.path(SUP,"FigS1_confound_battery.pdf"), pE, width=8.2, height=4.1, device = pdf_device)
 ggsave(file.path(SUP,"FigS1_confound_battery.png"), pE, width=8.2, height=4.1, dpi=200)
 
+# ---------------------------------------------------------------- naive-null landscape
 cat("[FigS1_div] naive size-only null landscape ...\n")
 XL <- Xm[yLb,,drop=FALSE]; XO <- Xm[!yLb,,drop=FALSE]
 rL <- lnor_var(XL); rO <- lnor_var(XO); LL<-rL$L; LO<-rO$L; dL<-LL-LO
 Zm <- (LL-LO)/sqrt(rL$V+rO$V); Pm <- 2*pnorm(abs(Zm),lower.tail=FALSE)
 ut <- upper.tri(Pm); qv <- p.adjust(Pm[ut],"BH")
+
+# Numerical source data for Supplementary Figure S1C. One row per unique gene
+# pair reproduces all three heatmaps and the nominal-P dot overlay. The plotted
+# colour values are clipped to [-2, 2] by melt_mat(), so both raw and displayed
+# values are retained explicitly.
+pair_idx <- which(ut, arr.ind=TRUE)
+naive_source <- data.table(
+  gene_1 = GENES[pair_idx[, "row"]],
+  gene_2 = GENES[pair_idx[, "col"]],
+  lung_log_odds_ratio_raw = LL[ut],
+  other_log_odds_ratio_raw = LO[ut],
+  difference_lung_minus_other_raw = dL[ut],
+  lung_log_odds_ratio_plotted = pmin(pmax(LL[ut], -2), 2),
+  other_log_odds_ratio_plotted = pmin(pmax(LO[ut], -2), 2),
+  difference_lung_minus_other_plotted = pmin(pmax(dL[ut], -2), 2),
+  z_score = Zm[ut],
+  p_value = Pm[ut],
+  bh_fdr = qv,
+  nominal_p_lt_0_05 = Pm[ut] < 0.05,
+  n_lung_biopsies = sum(yLb),
+  n_other_metastatic_biopsies = sum(!yLb)
+)
+fwrite(naive_source,
+       file.path(OUTPUT_TBL_DIR, "FigS1C_naive_null_landscape_source_data.csv"))
+
 melt_mat <- function(Mat){d<-as.data.table(as.table(Mat));setnames(d,c("g1","g2","val"))
   d[,g1:=factor(g1,levels=GENES)][,g2:=factor(g2,levels=rev(GENES))];d[g1==g2,val:=NA]
   d[,val:=pmin(pmax(val,-2),2)];d}

@@ -1,8 +1,22 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Epistasis residual (Norman additive model) BY PERTURBATION LABEL (lanes pooled).
+#   delta_X = pseudobulk(X) - pseudobulk(NT*NT)   [all by label, both lanes]
+#   fit  delta_DKO = c1*delta_PTEN + c2*delta_partner + eps   (through origin, over genes)
+#   c1,c2 = additive coefficients; R2 = additivity; eps = neomorphic (epistatic) residual.
+# The residual is a difference-of-differences, so the modest lane offset cancels
+# (partner arms share it; balanced baselines cancel) -> label-pooled is clean here.
+# Permutation null: shuffle the 4 labels within the 2x2 (preserve sizes), RE-SELECT
+# responsive genes each shuffle (avoids selection circularity) -> p for residual & DKO.
+# Gene level (SCT) + Hallmark AUCell level (reuse group_cache). In vitro + in vivo.
+# v7 repo overhaul 2026-07-15: relocated from XL_code/fig3_panels_new_build/label_epistasis_residual.R; was panelJ_interaction_coeffs (stats half) -> FigS3G_coefficient_flip_stats.
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 set.seed(1234)
 suppressPackageStartupMessages({ library(Seurat); library(SeuratObject); library(matrixStats) })
 PARTNERS <- c("Cdh1","Cx3cl1","Cxcr5","Tlr7"); CAP <- 700; R <- 400; SEL <- 0.10
 
+# through-origin 2-predictor regression on responsive genes -> list(c1,c2,R2,resid,sel)
 fit_gi <- function(dPT,dPA,dDK){
   sel <- abs(dPT)>SEL | abs(dPA)>SEL | abs(dDK)>SEL
   if(sum(sel)<20) return(NULL)
@@ -22,7 +36,7 @@ analyze <- function(M, cellsets, tag, level){
     nt<-cap(nt); pt<-cap(pt); pa<-cap(pa); g<-cap(g)
     pb<-function(cells) rowMeans(M[,cells,drop=FALSE])
     obs<-fit_gi(pb(pt)-pb(nt), pb(pa)-pb(nt), pb(g)-pb(nt)); if(is.null(obs)) next
-
+    # permutation: pool the 4 groups, shuffle labels preserving sizes
     pool<-c(nt,pt,pa,g); nk<-c(length(nt),length(pt),length(pa),length(g)); cut<-cumsum(nk)
     Sp<-M[,pool,drop=FALSE]
     nulls<-replicate(R,{ pr<-sample.int(sum(nk))
@@ -34,7 +48,7 @@ analyze <- function(M, cellsets, tag, level){
     out[[p]]<-data.frame(context=tag,level=level,partner=p,c1=obs$c1,c2=obs$c2,R2=obs$R2,
       resid_norm=obs$resid_norm,resid_p=p_resid,dko_norm=obs$dko_norm,dko_p=p_dko,
       n_sel=obs$nsel,n_DKO=length(g))
-
+    # neomorphic features (top |residual|)
     feats<-rownames(M)[obs$sel]; rr<-obs$resid
     ord<-order(-abs(rr)); k<-min(30,length(rr))
     neom[[p]]<-data.frame(context=tag,level=level,partner=p,feature=feats[ord][1:k],residual=rr[ord][1:k])
@@ -47,13 +61,13 @@ for(cc in list(c("Perturb_InVitro_HTO.rds","In vitro","invitro"), c("Perturb_InV
   cat("\n#########",cc[2],"#########\n")
   o<-readRDS(raw(cc[1])); pert<-as.character(o$perturbation); names(pert)<-colnames(o)
   cs<-split(colnames(o),pert)
-
+  # gene level (SCT data, expressed genes)
   D<-GetAssayData(o,assay="SCT",layer="data"); det<-rowMeans(D[,unlist(cs)]>0); D<-D[det>0.10,]
   rg<-analyze(D,cs,cc[2],"gene"); COEF[[paste0("g",cc[2])]]<-rg$coef; NEOM[[cc[2]]]<-rg$neom
-
+  # pathway level (Hallmark AUCell from group_cache)
   U<-readRDS(cache(paste0("ucell_hallmark_",cc[3],".rds")))$U
   rp<-analyze(U,cs,cc[2],"pathway"); COEF[[paste0("p",cc[2])]]<-rp$coef
-
+  # also save per-pathway residual (all 50) for a heatmap
   pbU<-function(cells) rowMeans(U[,cells,drop=FALSE])
   for(p in PARTNERS){ g<-cs[[paste0("Pten*",p)]]; if(is.null(g)) next
     dPT<-pbU(cs[["Pten*NT"]])-pbU(cs[["NT*NT"]]); dPA<-pbU(cs[[paste0("NT*",p)]])-pbU(cs[["NT*NT"]]); dDK<-pbU(g)-pbU(cs[["NT*NT"]])

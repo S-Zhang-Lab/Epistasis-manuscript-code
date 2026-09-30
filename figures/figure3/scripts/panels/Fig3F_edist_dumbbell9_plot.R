@@ -1,3 +1,7 @@
+#!/usr/bin/env Rscript
+# Plot-only: Fig. 3F 9-genotype raw E-distance dumbbell with exact FDR-q (staggered labels).
+# Reads cached stats from panelE_edist9_stats.csv (from build_panelE_edist_exactq.R).
+# v7 repo overhaul 2026-07-15 : relocated from XL_code/fig3_panels_new_build/build_panelE_edist9_plot.R; was panelE_edist_dumbbell9 -> Fig3F_edist_dumbbell9.
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 suppressPackageStartupMessages({ library(data.table); library(ggplot2) })
 PT <- 1/72
@@ -8,12 +12,12 @@ base5 <- theme_classic(base_size=5, base_family="Helvetica") +
         legend.margin=margin(0,0,0,0), legend.box.spacing=unit(1,"pt"), plot.margin=margin(1,3,1,1), plot.title=element_blank())
 
 D <- fread(tbl("Fig3F_edist9_stats.csv"))
-BAND <- D$band[1]
+BAND <- D$band[1]   # control-vs-control 95th pct baseline band (written by the stats step)
 D[, context := factor(context, levels=c("In vitro","In vivo"))]
 ord <- c("Pten*Cdh1","Pten*Cx3cl1","Pten*Cxcr5","Pten*Tlr7","NT*Cdh1","NT*Cx3cl1","NT*Cxcr5","NT*Tlr7","Pten*NT")
 Dw <- dcast(D, geno+cat ~ context, value.var="edist"); setnames(Dw, c("geno","cat","vr","vo"))
 ql <- dcast(D, geno ~ context, value.var="qlab"); setnames(ql, c("geno","qv","qo")); Dw <- merge(Dw, ql, by="geno")
-Dw[, geno := factor(pair_lab(geno), levels=pair_lab(rev(ord)))]
+Dw[, geno := factor(pair_lab(geno), levels=pair_lab(rev(ord)))]   # display "_" (house style); data keep "*"
 xmax <- max(Dw$vr)*1.12
 p9 <- ggplot(Dw) +
   annotate("rect", xmin=-Inf, xmax=BAND, ymin=-Inf, ymax=Inf, fill="grey92") +

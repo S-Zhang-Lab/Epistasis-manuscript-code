@@ -1,3 +1,13 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Fig. 3G — split in-vivo UMAP (Synergistic | Buffering), clean object.
+# Colour = annotated cell state (cluster_identity_labels_in_vivo.csv, 11 clusters
+# -> 7 states). Grey = all cells (both lanes) behind each facet. ~320 x 150 pt.
+#
+# v7 repo overhaul 2026-07-15: relocated from
+# XL_code/fig3_panels_new_build/prototypes_panelK/build_panelJ_umap.R;
+# was panelJ_umap_split -> Fig3G_umap_split_invivo.
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 suppressPackageStartupMessages({ library(Seurat); library(data.table); library(ggplot2); library(ggh4x) })
 OUT <- fig_main(); dir.create(OUT, showWarnings=FALSE)
@@ -18,6 +28,7 @@ df[, state := factor(state, levels=states)]
 cat("cells:", nrow(df), " | state counts:\n"); print(df[, .N, by=state][order(-N)])
 cat("\nlane x state proportions (convergence check):\n"); print(round(prop.table(table(df$lane, df$state),1),3))
 
+## background: all cells shown (grey) in EACH facet
 bg <- rbindlist(lapply(levels(df$lane), function(L){ data.table(UMAP1=df$UMAP1, UMAP2=df$UMAP2, lane=factor(L, levels=levels(df$lane))) }))
 
 pal <- c("Proliferative"="#E8724C","Hypoxia/glycolysis"="#2E8B57","EMT/matrix"="#38A6C9",

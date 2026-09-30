@@ -1,9 +1,21 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Fig 3 — cluster IDENTITY by UCell Hallmark enrichment (each context separate).
+# Per-cluster mean UCell (reused from fig3_singlecell_epistasis/objects/ucell_scores.rds),
+# z-scored across clusters -> identity heatmap + PROPOSED biologist-readable labels
+# (curate manually). Lets in-vitro & in-vivo cluster phenotypes be cross-read by
+# biology, WITHOUT forcing cluster-to-cluster mapping. Convention: fig3_theme.R.
+# v7 repo overhaul 2026-07-15: relocated from XL_code/fig3_panels_new_build/build_cluster_identity.R;
+#   cache builder (no panel; the identity DotPlot is FigS3C's job) — reads
+#   ucell_scores.rds via cache() + both raw objects; emits label + z-score CSVs
+#   under cache() with basenames preserved.
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 set.seed(1234)
 suppressPackageStartupMessages({ library(Seurat); library(SeuratObject); library(ggplot2) })
 
-U <- readRDS(cache("ucell_scores.rds"))
-
+U <- readRDS(cache("ucell_scores.rds"))  # $vivo, $vitro : cells x 50 Hallmark
+# Hallmark -> broad biological process (for PROPOSED labels; curate)
 CAT <- c(
   E2F_TARGETS="Proliferative", G2M_CHECKPOINT="Proliferative", MYC_TARGETS_V1="Proliferative",
   MYC_TARGETS_V2="Proliferative", MITOTIC_SPINDLE="Proliferative", DNA_REPAIR="Proliferative",
@@ -35,17 +47,17 @@ build <- function(uc, file, tag){
   uc <- uc[names(cl)[names(cl) %in% rownames(uc)], , drop=FALSE]
   clv <- cl[rownames(uc)]
   colnames(uc) <- short(colnames(uc))
-
-  mu <- t(apply(t(uc), 1, function(x) tapply(x, clv, mean)))
-  z  <- t(scale(t(mu)))
+  # per-cluster mean, z across clusters
+  mu <- t(apply(t(uc), 1, function(x) tapply(x, clv, mean)))          # hallmark x cluster
+  z  <- t(scale(t(mu)))                                               # z per hallmark across clusters
   clord <- as.character(sort(as.integer(colnames(z))))
   z <- z[, clord]
-
+  # top-variable hallmarks for the heatmap
   vv <- apply(z,1,function(x) max(x)-min(x)); topv <- names(sort(vv,decreasing=TRUE))[1:22]
-
+  # per-cluster top enriched hallmarks + proposed label
   lab <- do.call(rbind, lapply(clord, function(cc){
     top <- names(sort(z[,cc], decreasing=TRUE))[1:3]
-    propose <- CAT[top[1]]; if (is.na(propose)) propose <- CAT[top[2]]
+    propose <- CAT[top[1]]; if (is.na(propose)) propose <- CAT[top[2]]   # key off the top hit
     data.frame(context=tag, cluster=cc, n=sum(clv==cc),
                top1=top[1], top2=top[2], top3=top[3],
                proposed_label=ifelse(is.na(propose),"(curate)",propose), row.names=NULL)
@@ -53,7 +65,10 @@ build <- function(uc, file, tag){
   write.csv(lab, cache(paste0("cluster_identity_labels_", tag, ".csv")), row.names=FALSE)
   write.csv(cbind(hallmark=rownames(z), round(z,3)),
             cache(paste0("cluster_identity_zscore_", tag, ".csv")), row.names=FALSE)
-
+  # NOTE (2026-07-09): the identity HEATMAP is RETIRED. The Seurat-convention
+  # DotPlot (build_cluster_dotplot.R) is the identity panel (supplement). This
+  # script is kept only to emit the label + z-score CSVs that feed the dotplot
+  # interpretation; `topv` is still used by the dotplot's program selection.
   cat("\n===", tag, "proposed cluster labels ===\n"); print(lab[,c("cluster","n","top1","proposed_label")], row.names=FALSE)
   rm(o); gc(verbose=FALSE)
 }

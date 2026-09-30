@@ -1,3 +1,15 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Fig. 3D / Supplementary Fig. S3F — the NICHE-ADAPTATION PROGRAM (what the metastatic niche imposes).
+# The pure environmental effect: NT*NT cells (the common control genotype) in vitro
+# vs in vivo. HARMONIZED RNA -> logCPM (SCT models are dataset-specific, not
+# comparable across objects). Two parts:
+#   (C1) volcano of niche-adaptation DEGs (in vivo vs in vitro)
+#   (C2) Hallmark pathways the niche turns on/off (UCell, Cohen d in vivo vs in vitro)
+#
+# v7 repo overhaul 2026-07 : relocated from XL_code/fig3_panels_new_build/build_panelC_niche_program.R;
+#   was panelC_niche_pathways -> Fig3D_niche_program_hallmark (main), panelC_niche_volcano -> FigS3F_niche_volcano (supp).
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 set.seed(1234)
 suppressPackageStartupMessages({ library(Seurat); library(SeuratObject); library(presto); library(UCell); library(matrixStats); library(ggplot2) })
@@ -14,6 +26,7 @@ g  <- intersect(rownames(Cv), rownames(Co)); C <- cbind(Cv[g,,drop=FALSE], Co[g,
 env <- factor(c(rep("In vitro",ncol(Cv)), rep("In vivo",ncol(Co))), levels=c("In vitro","In vivo"))
 cat(sprintf("NT*NT cells: in vitro %d, in vivo %d; common genes %d\n", ncol(Cv), ncol(Co), length(g)))
 
+## ---- harmonized logCPM + DE (in vivo vs in vitro) ---------------------------
 cpm  <- t(t(C)/colSums(C))*1e6; lcpm <- log1p(cpm)
 w <- presto::wilcoxauc(lcpm, as.character(env)); w <- w[w$group=="In vivo",]
 mvivo <- rowMeans(cpm[, env=="In vivo"]); mvitro <- rowMeans(cpm[, env=="In vitro"])
@@ -26,19 +39,21 @@ write.csv(DE, tbl("FigS3F_niche_DE.csv"), row.names=FALSE)
 cat(sprintf("niche-adaptation DEGs (padj<0.05,|log2FC|>1): %d up in vivo, %d up in vitro\n",
             sum(DE$sig & DE$log2FC>0), sum(DE$sig & DE$log2FC<0)))
 
-U <- t(ScoreSignatures_UCell(C, features=HALL, name="", BPPARAM=BiocParallel::SerialParam()))
+## ---- Hallmark pathways (UCell, Cohen d in vivo vs in vitro) -----------------
+U <- t(ScoreSignatures_UCell(C, features=HALL, name="", ncores=1))
 cohen <- function(a,b) (mean(a)-mean(b))/sqrt(((length(a)-1)*var(a)+(length(b)-1)*var(b))/(length(a)+length(b)-2))
 PA <- data.frame(pathway=sub("HALLMARK_","",rownames(U)),
                  cohen_d=apply(U,1,function(r) cohen(r[env=="In vivo"], r[env=="In vitro"])),
                  padj=p.adjust(apply(U,1,function(r) wilcox.test(r[env=="In vivo"], r[env=="In vitro"])$p.value),"BH"))
 write.csv(PA, tbl("Fig3D_niche_pathways.csv"), row.names=FALSE)
 
+## ---- C1 volcano (compact ~115pt, visible dots, 5pt italic gene labels) ------
 DE$y <- pmin(-log10(DE$padj), 300)
 up <- DE[DE$sig & DE$log2FC>0,]; dn <- DE[DE$sig & DE$log2FC<0,]
-lab <- rbind(head(up[order(-up$log2FC),],6), head(dn[order(dn$log2FC),],3))
+lab <- rbind(head(up[order(-up$log2FC),],6), head(dn[order(dn$log2FC),],3))   # 9 genes only
 pC1 <- ggplot(DE, aes(log2FC, y)) +
   geom_point(data=subset(DE,!sig), colour="grey82", size=0.35, stroke=0) +
-  geom_point(data=subset(DE, sig), aes(colour=log2FC>0), size=0.9, stroke=0) +
+  geom_point(data=subset(DE, sig), aes(colour=log2FC>0), size=0.9, stroke=0) +   # sig dots BIG
   geom_vline(xintercept=c(-1,1), linetype="dashed", colour="grey75", linewidth=0.25) +
   ggrepel::geom_text_repel(data=lab, aes(label=gene), size=FS/.MM, fontface="italic",
                            max.overlaps=Inf, min.segment.length=0, segment.size=0.2, box.padding=0.35, seed=1) +
@@ -47,6 +62,7 @@ pC1 <- ggplot(DE, aes(log2FC, y)) +
   fig_theme
 save_panel(pC1, "FigS3F_niche_volcano", 1.6, 1.6, fig_supp())
 
+## ---- C2 Hallmark bar (compact; 13 pathways at 5pt) -------------------------
 ps <- PA[PA$padj<0.05,]; ps <- ps[order(-ps$cohen_d),]; ps <- rbind(head(ps,7), tail(ps,6))
 ps$pathway <- factor(ps$pathway, levels=rev(ps$pathway))
 pC2 <- ggplot(ps, aes(cohen_d, pathway, fill=cohen_d>0)) +

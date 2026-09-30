@@ -1,3 +1,13 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# PER-MOUSE P2 — pre-specified niche program, each DKO minus its OWN MOUSE's NT*NT.
+# Replicate unit = HTO-demuxed mouse (hash.ID); AUCell per-cell scores from cache.
+# Panels ~150x150 pt, Helvetica 6 pt. For review.
+# v7 repo overhaul 2026-07-15: relocated from
+#   XL_code/fig3_panels_new_build/prototypes_panelK/build_protoK_P2_permouse.R;
+#   split into dotplot (this file) + pointrange (FigS3J_permouse_pointrange.R);
+#   was protoK_P2permouse_A_dotplot -> Fig3H_permouse_residual_dotplot.
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 suppressPackageStartupMessages({ library(Seurat); library(data.table); library(ggplot2) })
 FS6 <- 6
@@ -7,25 +17,29 @@ th6 <- fig_theme + theme(
   strip.text=element_text(size=FS6, face="bold"), plot.title=element_text(size=FS6+0.5, face="bold"),
   plot.subtitle=element_text(size=FS6-0.5, colour="grey35"))
 
-au_raw <- readRDS(cache("aucell_hallmark_invivo.rds"))
+## --- cached per-cell AUCell hallmark (in vivo) ---
+au_raw <- readRDS(cache("aucell_hallmark_invivo.rds"))   # was local var `raw`; renamed so it does not shadow the raw() path helper
 cat("cache class:", class(au_raw)[1], "\n")
 au <- if (is.list(au_raw) && !is.data.frame(au_raw)) {
   ix <- which(sapply(au_raw, function(x) (is.matrix(x)||inherits(x,"Matrix")) && length(dim(x))==2)); as.matrix(au_raw[[ix[1]]])
 } else as.matrix(au_raw)
-if (nrow(au) > ncol(au)) au <- t(au)
+if (nrow(au) > ncol(au)) au <- t(au)                 # pathways x cells
 cat("AUCell (path x cell):", paste(dim(au), collapse=" x "), " | eg rows:", paste(head(rownames(au),2),collapse=", "), "\n")
 
+## --- object meta: perturbation, lane, mouse(hash) ---
 o <- readRDS(raw("Perturb_InVivo_merged.rds"))
 md <- data.table(cell=colnames(o), pert=as.character(o$perturbation),
                  lane=as.character(o$lane),
-                 mouse=paste(as.character(o$lane), as.character(o$hash.ID), sep="|"))
+                 mouse=paste(as.character(o$lane), as.character(o$hash.ID), sep="|"))  # HTO reused across lanes -> mouse = lane x HTO
 rm(o); gc(verbose=FALSE)
 cat("\nlane x mouse:\n"); print(table(md$lane, md$mouse))
 
+## --- align cache <-> meta ---
 common <- intersect(colnames(au), md$cell)
 cat("\ncells AUCell:", ncol(au), " meta:", nrow(md), " common:", length(common), "\n")
 au <- au[, common, drop=FALSE]; md <- md[match(common, cell)]
 
+## --- pre-specified niche program ---
 niche_up <- c("INTERFERON_GAMMA_RESPONSE","INTERFERON_ALPHA_RESPONSE","INFLAMMATORY_RESPONSE",
               "IL6_JAK_STAT3_SIGNALING","TNFA_SIGNALING_VIA_NFKB","EPITHELIAL_MESENCHYMAL_TRANSITION","ANGIOGENESIS")
 niche_dn <- c("MYC_TARGETS_V1","E2F_TARGETS","G2M_CHECKPOINT","MTORC1_SIGNALING","OXIDATIVE_PHOSPHORYLATION","GLYCOLYSIS")
@@ -36,6 +50,7 @@ disp <- c(INTERFERON_GAMMA_RESPONSE="IFN-gamma", INTERFERON_ALPHA_RESPONSE="IFN-
           ANGIOGENESIS="Angiogenesis", MYC_TARGETS_V1="MYC targets", E2F_TARGETS="E2F targets", G2M_CHECKPOINT="G2M checkpoint",
           MTORC1_SIGNALING="mTORC1", OXIDATIVE_PHOSPHORYLATION="OxPhos", GLYCOLYSIS="Glycolysis")
 
+## --- per (mouse x pert x pathway) mean AUCell ---
 S <- as.data.table(t(au[rn, , drop=FALSE])); setnames(S, niche)
 S[, `:=`(pert=md$pert, lane=md$lane, mouse=md$mouse)]
 long <- melt(S, id.vars=c("pert","lane","mouse"), variable.name="pathway", value.name="score")
@@ -51,6 +66,7 @@ cat("\ncells-per (mouse x DKO), min:", min(dev$n), " NT*NT min:", min(dev$n_base
 dev <- dev[n>=MINCELL & n_base>=MINCELL]
 cat("mouse-genotype observations kept:", nrow(dev), " (of", length(niche), "paths x", nrow(unique(dev[,.(mouse,partner)])), "mouse-genotypes)\n")
 
+## per partner (mean +/- SE over mice) and per eclass
 summ_p <- dev[, .(m=mean(dev), se=sd(dev)/sqrt(.N), nmice=.N), by=.(pathway, partner, eclass)]
 summ_e <- dev[, .(m=mean(dev), se=sd(dev)/sqrt(.N), nmice=.N,
                   sign_consistent=(all(dev>0)|all(dev<0))), by=.(pathway, eclass)]
@@ -60,6 +76,7 @@ cat("\n--- syn - buf (mouse-mean dev) per pathway ---\n")
 wide <- dcast(summ_e, pathway ~ eclass, value.var="m"); wide[, syn_minus_buf := Synergistic - Buffering]
 print(wide[order(-abs(syn_minus_buf))][, lapply(.SD, function(x) if(is.numeric(x)) round(x,4) else x)])
 
+## factor orders
 ford <- rev(disp[niche])
 summ_p[, plab := factor(disp[as.character(pathway)], levels=ford)]
 summ_e[, plab := factor(disp[as.character(pathway)], levels=ford)]
@@ -67,6 +84,7 @@ summ_p[, partner := factor(partner, levels=c("Cdh1","Cx3cl1","Cxcr5","Tlr7"))]
 summ_p[, eclass := factor(eclass, levels=c("Synergistic","Buffering"))]
 summ_e[, eclass := factor(eclass, levels=c("Synergistic","Buffering"))]
 
+## --- A: mouse-averaged dotplot (pathway x DKO) ---
 lim <- max(abs(summ_p$m))
 pA <- ggplot(summ_p, aes(partner, plab)) +
   geom_point(aes(fill=m, size=abs(m)), shape=21, colour="grey40", stroke=0.2) +
@@ -82,4 +100,4 @@ ggsave(fig_main("Fig3H_permouse_residual_dotplot.pdf"), pA, device="pdf", width=
 ggsave(fig_main("Fig3H_permouse_residual_dotplot.png"), pA, width=3.1, height=2.25, units="in", dpi=300, bg="white")
 
 cat("\nDONE. wrote Fig3H_permouse_residual_dotplot (pdf/png) to", fig_main(),
-    "and P2_permouse_deviations.csv (per-mouse deviations) to", cache(), "\n")
+    "and P2_permouse_deviations.csv (deviations handoff) to", cache(), "\n")

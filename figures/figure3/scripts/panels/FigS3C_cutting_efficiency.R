@@ -1,3 +1,11 @@
+#!/usr/bin/env Rscript
+# =============================================================================
+# Fig S3C -- enAsCas12a cutting efficiency (CRISPResso2 % editing) per target gene.
+# Each point = one dual-guide construct/sample measurement (amplicon-NGS/CRISPResso2);
+# genes ordered PTEN anchor -> synergy partners (Cdh1, Cx3cl1) -> buffer partners
+# (Cxcr5, Tlr7); crossbar = median. Confirms the perturbations were edited before
+# injection. v7 overhaul 2026-07-15: built from XL_code/CE/Perturb_Cutting.xlsx.
+# =============================================================================
 if (!exists("save_panel", mode = "function")) source(here::here("scripts", "00_setup.R"))
 suppressPackageStartupMessages({ library(data.table); library(ggplot2) })
 

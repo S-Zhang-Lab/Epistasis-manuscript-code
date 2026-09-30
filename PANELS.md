@@ -22,7 +22,7 @@ Panel labels refer to the manuscript figures. Script filenames can reflect earli
 | S1B | Alteration load | Code | [FigS1_cohort_and_exposure.R](figures/figure1/scripts/supplementary/FigS1_cohort_and_exposure.R) |  |
 | S1C | Co-occurrence null landscape | Code | [FigS1_divergence.R](figures/figure1/scripts/supplementary/FigS1_divergence.R) |  |
 | S1D | Divergence sensitivity analyses | Code | [FigS1_divergence.R](figures/figure1/scripts/supplementary/FigS1_divergence.R) |  |
-| S1E | Coactivation matrices | Code | [FigS1_divergence.R](figures/figure1/scripts/supplementary/FigS1_divergence.R) |  |
+| S1E | Coactivation matrices | Code | [Fig1_G_pathway_rewiring.R](figures/figure1/scripts/Fig1_G_pathway_rewiring.R) | Primary- and lung-metastasis coactivation matrices are generated as Variant B in this script. |
 
 ## Figure 2 and supplement
 

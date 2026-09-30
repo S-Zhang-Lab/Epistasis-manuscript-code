@@ -60,7 +60,7 @@ cond_colors  <- c(Cell = "#E15759", WT = "#4E79A7", Depleted = "#59A14F")
 shape_values <- c(Cx3cr1 = 21, Mrc1 = 22, Cell = 24)
 
 variants <- list(
-  list(label = "nocell", file = "Fig5S_S3_pca.pdf",    keep_cell = FALSE)
+  list(label = "nocell", file = "FigS5C_count_PCA.pdf", keep_cell = FALSE)
 )
 
 for (v in variants) {
@@ -77,6 +77,23 @@ for (v in variants) {
   meta$shape_class <- ifelse(meta$cond == "Cell", "Cell",
                              ifelse(meta$exp == "Cx3cr1", "Cx3cr1", "Mrc1"))
   meta$shape_class <- factor(meta$shape_class, levels = names(shape_values))
+
+  # Numerical source data for Supplementary Fig. 5C: the exact sample
+  # coordinates and encodings supplied to the Count PCA plot below.
+  readr::write_csv(
+    meta |>
+      dplyr::transmute(
+        sample,
+        PC1,
+        PC2,
+        experiment = exp,
+        condition = as.character(cond),
+        shape_class = as.character(shape_class),
+        PC1_variance_percent = pca$pc1v,
+        PC2_variance_percent = pca$pc2v
+      ),
+    tbl("FigS5C_count_PCA_source_data.csv")
+  )
 
   p <- ggplot(meta, aes(x = PC1, y = PC2, fill = cond, shape = shape_class)) +
     geom_hline(yintercept = 0, color = "gray85", linewidth = 0.3) +
