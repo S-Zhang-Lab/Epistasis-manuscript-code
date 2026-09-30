@@ -1,6 +1,6 @@
 # Data inputs and provenance
 
-Included analytical inputs are enumerated with byte sizes and SHA-256 hashes in [inputs.tsv](inputs.tsv). `python3 scripts/validate.py` verifies every listed file. Data values are retained from the source figure workflows. Machine-specific workbook paths and personal edit metadata have been removed; worksheet and shared-string XML are unchanged. The input manifest also records the original source-file hashes. Paths below are relative to the relevant `figures/figureN/` module.
+Included analytical inputs are enumerated with byte sizes and SHA-256 hashes in [inputs.tsv](../inputs.tsv). `python3 tools/validate.py` verifies every listed file. Data values are retained from the source figure workflows. Machine-specific workbook paths and personal edit metadata have been removed; worksheet and shared-string XML are unchanged. The input manifest also records the original source-file hashes. Paths below are relative to the relevant `figures/figureN/` module.
 
 ## Included inputs
 

@@ -1,5 +1,5 @@
 # Parse analytical code and repository utilities without executing analyses.
-files <- unlist(lapply(c("figures", "scripts"), function(folder) {
+files <- unlist(lapply(c("figures", "tools"), function(folder) {
   list.files(folder, pattern = "[.]R$", recursive = TRUE, full.names = TRUE)
 }), use.names = FALSE)
 stopifnot(length(files) > 0)
