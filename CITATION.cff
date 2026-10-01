@@ -4,7 +4,7 @@ type: software
 title: "Epistasis manuscript code"
 abstract: "Analysis and plotting code accompanying Niche-dependent epistasis within the cancer genome shapes metastatic fitness, by Xiyu Liu and colleagues."
 version: 1.0.0
-date-released: 2026-09-24
+date-released: 2026-09-30
 license: MIT
 repository-code: "https://github.com/S-Zhang-Lab/Epistasis-manuscript-code"
 keywords:

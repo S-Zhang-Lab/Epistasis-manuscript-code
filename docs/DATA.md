@@ -38,7 +38,7 @@ Figure 1 includes scripts to rederive the cBioPortal subsets from upstream files
 
 ## External inputs for Figure 3
 
-Place these exact files in `figures/figure3/data/raw/`. They are excluded from Git. Both are deposited at Zenodo under [doi:10.5281/zenodo.21384699](https://doi.org/10.5281/zenodo.21384699), which always resolves to the current version of the record; access opens at publication. The sequencing data underlying them are in GEO under accessions GSE322808 and GSE322809.
+Place these exact files in `figures/figure3/data/raw/`. They are excluded from Git. Both are publicly available at Zenodo under [doi:10.5281/zenodo.21384699](https://doi.org/10.5281/zenodo.21384699), which resolves to the current version of the record. The deposited version checked on 2026-10-01 is [doi:10.5281/zenodo.21384700](https://doi.org/10.5281/zenodo.21384700); its filenames, byte sizes and MD5 checksums match the table below. The sequencing data underlying them are in GEO under accessions GSE322808 and GSE322809.
 
 | Filename | Bytes | MD5 |
 |---|---:|---|

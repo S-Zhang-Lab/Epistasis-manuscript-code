@@ -22,7 +22,7 @@ figures/figureN/     one self-contained module per manuscript figure
     output/                       created on run, not tracked
 ```
 
-Two directories are named `scripts`, and they differ. `tools/` at the root holds commands that act on the
+`tools/` at the root holds commands that act on the
 whole repository. `figures/figureN/scripts/` holds the analyses for one figure.
 
 Script naming is not uniform across modules, because the five modules began as five separate repositories.
@@ -43,7 +43,7 @@ Filenames also carry earlier panel lettering in places. Resolve any panel throug
 
 ## Reproduction
 
-Use R 4.5.1 and Python 3.9 or newer. Python uses only its standard library. Run these commands from the repository root. Package installation requires network access; Bioconductor packages and their system dependencies are needed for several modules. Several packages compile from source and need a working Fortran toolchain, which is the usual cause of a failed restore on macOS; configuring a binary repository such as `options(repos = c(P3M = "https://packagemanager.posit.co/cran/latest"))` avoids the compilers entirely.
+Use R 4.5.1 and Python 3.9 or newer. Python uses only its standard library. Run these commands from the repository root. Package installation requires network access; Bioconductor packages and their system dependencies are needed for several modules. Packages restored from source may require C/C++ and Fortran compilers. On macOS, verify that the library directories reported by `R CMD config FLIBS` exist before restoring. Compatible prebuilt binaries can avoid compilation where available.
 
 ```bash
 # Check the included files and the panel-to-code mapping.

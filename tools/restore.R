@@ -11,7 +11,7 @@
 # an individual script.
 args <- commandArgs(trailingOnly = TRUE)
 if (!length(args) || any(!args %in% as.character(1:5)))
-  stop("Usage: Rscript scripts/restore.R 1 [2 3 4 5]")
+  stop("Usage: Rscript tools/restore.R 1 [2 3 4 5]")
 
 if (!requireNamespace("renv", quietly = TRUE))
   install.packages("renv", repos = "https://cloud.r-project.org")
@@ -45,8 +45,8 @@ if (length(failed)) {
   stop("renv::restore failed for: ", paste(failed, collapse = ", "), "\n",
        "  Packages that build from source need a working toolchain. On macOS a\n",
        "  mismatched gfortran is the usual cause; check that the paths reported\n",
-       "  by `R CMD config FLIBS` exist. Prebuilt binaries avoid this: set\n",
-       "  options(repos = c(P3M = \"https://packagemanager.posit.co/cran/latest\")).",
+       "  by `R CMD config FLIBS` exist. Compatible prebuilt binaries can avoid\n",
+       "  compilation where available for the requested R version and platform.",
        call. = FALSE)
 }
 

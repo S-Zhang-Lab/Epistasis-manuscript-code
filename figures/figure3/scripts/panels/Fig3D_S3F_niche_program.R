@@ -40,7 +40,8 @@ cat(sprintf("niche-adaptation DEGs (padj<0.05,|log2FC|>1): %d up in vivo, %d up 
             sum(DE$sig & DE$log2FC>0), sum(DE$sig & DE$log2FC<0)))
 
 ## ---- Hallmark pathways (UCell, Cohen d in vivo vs in vitro) -----------------
-U <- t(ScoreSignatures_UCell(C, features=HALL, name="", ncores=1))
+U <- t(ScoreSignatures_UCell(C, features=HALL, name="",
+                            BPPARAM=BiocParallel::SerialParam()))
 cohen <- function(a,b) (mean(a)-mean(b))/sqrt(((length(a)-1)*var(a)+(length(b)-1)*var(b))/(length(a)+length(b)-2))
 PA <- data.frame(pathway=sub("HALLMARK_","",rownames(U)),
                  cohen_d=apply(U,1,function(r) cohen(r[env=="In vivo"], r[env=="In vitro"])),

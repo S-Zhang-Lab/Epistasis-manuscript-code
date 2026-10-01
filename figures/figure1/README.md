@@ -5,8 +5,8 @@ This module contains the analysis code and small inputs for Figure 1 and its sup
 From the repository root:
 
 ```bash
-Rscript scripts/restore.R 1
-python3 scripts/reproduce.py --figures 1
+Rscript tools/restore.R 1
+python3 tools/reproduce.py --figures 1
 ```
 
 See the [panel guide](../../docs/PANELS.md) for the manuscript panel mapping, the [data guide](../../docs/DATA.md) for input provenance, and [validation notes](../../docs/VALIDATION.md) for the tested scope.
